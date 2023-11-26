@@ -55,19 +55,24 @@ def create_box(sample_data_token, ann_rec):
 #-------------------------------------------
 
 # open dataset and json files
-nusc = NuScenes(version='v1.0-test', dataroot='data/sets/nuscenes', verbose=False)
+nusc = NuScenes(version='v1.0-test', dataroot='D:/nuscenes', verbose=False)
 pred_file = open('transfusion_results.json', 'r')
 pred_data = json.load(pred_file)
 margin = 50
 view_list = ['CAM_FRONT_LEFT', 'CAM_FRONT', 'CAM_FRONT_RIGHT', 'CAM_BACK_LEFT', 'CAM_BACK', 'CAM_BACK_RIGHT']
 # iterate over all samples
 for i, d in enumerate(pred_data['results']):
-    if i > 3:
+    if i > 1:
         break
     scene = nusc.get('scene', nusc.get('sample', str(d))['scene_token'])['name']
-    fig, axes = plt.subplots(1, 7, figsize=(36, 18))
-    
-    
+    # Create subplot with 2 columns and 1 row
+    fig = plt.figure(figsize=(18, 9))
+    fig.subplots_adjust(wspace=0, hspace=0)
+    subfigs = fig.subfigures(1, 2, width_ratios=[2,1], wspace=0, hspace=0) # 1 row, 2 columns for camera and lidar views
+    subfigs[0].subplots_adjust(wspace=0, hspace=0)
+    subfigs[1].subplots_adjust(wspace=0, hspace=0)
+    left = subfigs[0].subplots(2,3) # 2 rows, 3 columns for camera views
+    right = subfigs[1].subplots(1,1) # 1 row, 1 column for lidar view
     # plot lidar predictions
     # iterate over all predictions for the current sample
     for ann_rec in pred_data['results'][str(d)]:
@@ -78,17 +83,16 @@ for i, d in enumerate(pred_data['results']):
         # Plot LIDAR view.
         lidar = sample_record['data']['LIDAR_TOP']
         data_path, box, camera_intrinsic = create_box(lidar, ann_rec)
-        LidarPointCloud.from_file(data_path).render_height(axes[0], view=np.eye(4))
+        LidarPointCloud.from_file(data_path).render_height(right, view=np.eye(4))
         if box is not None:
-            box.render(axes[0], view=np.eye(4), colors=('b', 'b', 'b'), linewidth=2)
+            box.render(right, view=np.eye(4), colors=('b', 'b', 'b'), linewidth=2)
             corners = view_points(box.corners(), np.eye(4), False)[:2, :]
-            axes[0].text(corners[0, 0], corners[1, 0], ann_rec['detection_name'], color='b', fontsize=8)
-        axes[0].set_xlim([np.min(corners[0, :]) - margin, np.max(corners[0, :]) + margin])
-        axes[0].set_ylim([np.min(corners[1, :]) - margin, np.max(corners[1, :]) + margin])
-        axes[0].axis('off')
-        axes[0].set_aspect('equal')
-        axes[0].set_title('LIDAR view')
-        
+            right.text(corners[0, 0], corners[1, 0], ann_rec['detection_name'], color='b', fontsize=8)
+        right.set_xlim([np.min(corners[0, :]) - margin, np.max(corners[0, :]) + margin])
+        right.set_ylim([np.min(corners[1, :]) - margin, np.max(corners[1, :]) + margin])
+        right.axis('off')
+        #right.set_aspect('equal')
+
         # Plot CAMERA view.
         for j, view in enumerate(view_list):
             if(ann_rec['detection_score'] < 0.4):
@@ -97,17 +101,16 @@ for i, d in enumerate(pred_data['results']):
             data_path, box, camera_intrinsic = create_box(cam, ann_rec)
             im = Image.open(data_path)
             
-            axes[j+1].imshow(im)
-            axes[j+1].set_title(nusc.get('sample_data', cam)['channel'])
-            axes[j+1].axis('off')
-            axes[j+1].set_aspect('equal')
+            left[j//3][j%3].imshow(im)
+            left[j//3][j%3].axis('off')
+            #left[j//3][j%3].set_aspect('equal')
             if box is not None:
-                box.render(axes[j+1], view=camera_intrinsic, normalize=True, colors=('b', 'b', 'b'), linewidth= 1)
+                box.render(left[j//3][j%3], view=camera_intrinsic, normalize=True, colors=('b', 'b', 'b'), linewidth= 1)
                 corners = view_points(box.corners(), camera_intrinsic, True)[:2, :]
-                axes[j+1].text(corners[0, 0], corners[1, 0], ann_rec['detection_name'], color='b', fontsize=8)
+                left[j//3][j%3].text(corners[0, 0], corners[1, 0], ann_rec['detection_name'], color='b', fontsize=8)
         
     # save figure
-    plt.show()
+    fig.show()
     output_dir = 'output/'+ str(scene)
     os.makedirs(output_dir, exist_ok=True)
     #plt.savefig(output_dir +'/eval_' + str(i)+ '_' + str(d) +'.png')
