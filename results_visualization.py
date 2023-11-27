@@ -90,7 +90,7 @@ for i, d in enumerate(pred_data['results']):
         #right.set_xlim([np.min(corners[0, :]) - margin, np.max(corners[0, :]) + margin])
         #right.set_ylim([np.min(corners[1, :]) - 2*margin, np.max(corners[1, :]) + 2*margin])
         right.axis('off')
-        #right.set_aspect('equal')
+        right.set_aspect('equal')
 
         # Plot CAMERA view.
         for j, view in enumerate(view_list):

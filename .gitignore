@@ -162,3 +162,4 @@ cython_debug/
 data/
 output/
 transfusion_results.json
+results.py
