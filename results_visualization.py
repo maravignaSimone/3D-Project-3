@@ -1,7 +1,7 @@
 # Authors: Simone Maravigna, Francesco Marotta
 # Date: 2023-11
 # Project: 3D Object Detection on nuScenes Dataset
-# File: annotations_fusion.py
+# File: results_visualization.py
 # Description: This file contains the code to fuse the annotations from the 3D object detection taken by Lidar and the 2D object detection taken by Camera.
 
 #-------------------------------------------
