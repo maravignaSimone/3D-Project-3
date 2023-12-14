@@ -7,3 +7,4 @@ operating in urban environments using the nuScenes dataset. Specifically, the sy
 detect, localize and classify urban objects between 10 classes: car, truck, construction
 vehicle, bus, trailer, barrier, motorcycle, bike, pedestrian, traffic-cone.
 
+More details can be found in the [report](https://github.com/maravignaSimone/3D-Project-3/blob/main/3D_Object_Detection_with_Transformers.pdf).
